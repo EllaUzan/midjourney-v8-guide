@@ -828,115 +828,87 @@
      MOBILE
   ═══════════════════ */
   @media (max-width: 640px) {
-    body {
-      background: #f0efed;
-      height: auto;
-      overflow: auto;
-      align-items: flex-start;
-    }
+    body { background: #fff; }
 
     .frame {
-      width: 100%;
-      height: auto;
-      min-height: 100vh;
+      width: 100vw;
+      height: 100vh;
       box-shadow: none;
       border-radius: 0;
     }
 
-    .topbar { padding: 16px 20px; }
+    .topbar { padding: 14px 20px; height: 50px; }
     .topbar-center { display: none; }
     .topbar-menu { display: none; }
 
-    .slides-wrap {
-      position: static;
-      height: auto;
-      overflow: visible;
-    }
+    .bottombar { padding: 10px 20px; height: 56px; }
+    .dots { display: none; }
+    .bottom-left { display: none; }
+    .counter { font-size: 13px; }
 
-    .slide {
-      position: static;
-      display: block !important;
-      border-bottom: 1px solid #e8e8e8;
-    }
+    .nav-btn { font-size: 26px; padding: 0 10px; }
+
+    /* slides stay as deck — one at a time */
+    .slides-wrap { position: relative; overflow: hidden; }
+    .slide { position: absolute; inset: 0; display: none; overflow-y: auto; }
+    .slide.active { display: block; }
 
     /* all grids → single column */
     .s1, .s-split, .s4, .s6, .s7, .s8, .s10, .s12 {
       grid-template-columns: 1fr !important;
-      height: auto;
+      height: auto; min-height: 100%;
     }
 
-    /* hide creature images in grid slides on mobile */
     .s1-left, .s7-left, .s-half:first-child { display: none; }
 
-    .s1-right {
-      padding: 32px 20px;
-      border-left: none;
-    }
+    .s1-right { padding: 28px 20px; border-left: none; }
 
-    .s-half, .s4-left, .s4-right,
-    .sv-half, .s7-right, .s8-left, .s8-right,
+    .s1-right h1 { font-size: 80px; }
+
+    .s-half, .s4-right, .sv-half,
+    .s7-right, .s8-left, .s8-right,
     .s10-left, .s10-right, .s12-left, .s12-right {
-      padding: 24px 20px;
+      padding: 22px 20px;
       border-left: none !important;
     }
 
-    /* stack grids: show left side above right side */
+    .s4-left { padding: 22px 20px; border-left: none; }
+    .s4-left img, .s12-left img { height: 90px; }
     .s4, .s6, .s10, .s12 { display: flex; flex-direction: column; }
 
-    .s4-left img, .s12-left img { height: 100px; }
-
-    .s3, .s5, .s11 { padding: 24px 20px; }
-
+    .s3, .s5, .s11 { padding: 22px 20px; height: auto; min-height: 100%; }
+    .s3 h2 { font-size: 48px; }
+    .s5 h2 { font-size: 48px; }
     .s5 .top-row { flex-direction: column; align-items: flex-start; gap: 8px; }
-
-    .styl-cards, .s11-grid { grid-template-columns: 1fr; }
+    .styl-cards { grid-template-columns: 1fr; }
+    .s11-grid { grid-template-columns: 1fr; }
 
     .compare-grid { grid-template-columns: 1fr; }
     .cmp-arrow { display: none; }
 
-    .s9 { padding: 32px 20px; }
+    .s9 { padding: 28px 20px; }
 
-    .bottombar { padding: 12px 20px; }
-    .dots { display: none; }
-
-    /* mobile slide label */
-    .mob-label {
-      display: block;
-      font-size: 10px; font-weight: 700;
-      letter-spacing: 0.16em; text-transform: uppercase;
-      color: #bbb; padding: 20px 20px 0;
+    /* swipe hint */
+    .swipe-hint {
+      position: fixed;
+      bottom: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 11px;
+      color: #ccc;
+      letter-spacing: 0.08em;
+      pointer-events: none;
+      animation: fadeout 3s ease forwards;
+      animation-delay: 1s;
+      white-space: nowrap;
     }
-
-    /* hide desktop nav, show simple mobile nav */
-    .bottom-nav { display: none; }
-    .bottombar { justify-content: center; }
-    .counter { display: none; }
-    .bottom-left { display: none; }
-    .mob-nav-bar {
-      display: flex !important;
-      justify-content: center;
-      align-items: center;
-      gap: 20px;
-      padding: 16px;
-      border-top: 1px solid #e8e8e8;
-      background: #fff;
-      position: sticky;
-      bottom: 0;
-    }
-    .mob-nav-bar button {
-      background: #111; color: #fff;
-      border: none; padding: 10px 24px;
-      border-radius: 3px; font-size: 15px;
-      cursor: pointer; font-family: 'Heebo', sans-serif;
-    }
-    .mob-nav-bar .mob-counter {
-      font-size: 12px; color: #bbb; letter-spacing: 0.08em;
-    }
+    @keyframes fadeout { to { opacity: 0; } }
   }
 
   @media (min-width: 641px) {
     .mob-nav-bar { display: none; }
     .mob-label { display: none; }
+    .swipe-hint { display: none; }
   }
 
 </style>
@@ -1337,6 +1309,8 @@
     <div class="counter" id="counter">1 / 12</div>
   </div>
 
+  <div class="swipe-hint">← החליקי לניווט →</div>
+
   <!-- MOBILE NAV (sticky bottom) -->
   <div class="mob-nav-bar" id="mob-nav">
     <button onclick="go(-1)" id="mob-prev" disabled>←</button>
@@ -1411,6 +1385,14 @@
     if (e.key === 'ArrowRight' || e.key === 'ArrowDown') go(1);
     if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   go(-1);
   });
+
+  // swipe support
+  let tx = 0;
+  document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
+  document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - tx;
+    if (Math.abs(dx) > 50) go(dx < 0 ? 1 : -1);
+  }, { passive: true });
 
   goTo(0);
 </script>
