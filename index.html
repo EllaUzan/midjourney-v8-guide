@@ -1360,18 +1360,11 @@
 
   <div class="swipe-hint">← החליקי לניווט →</div>
 
-  <!-- MOBILE SIDE ARROWS -->
-  <button class="mob-arrow mob-arrow-prev" id="mob-arr-prev" onclick="go(-1)" style="display:none">›</button>
-  <button class="mob-arrow mob-arrow-next" id="mob-arr-next" onclick="go(1)"  style="display:none">‹</button>
-
-  <!-- MOBILE NAV (sticky bottom) -->
-  <div class="mob-nav-bar" id="mob-nav">
-    <button onclick="go(-1)" id="mob-prev" disabled>←</button>
-    <span class="mob-counter" id="mob-counter">1 / 12</span>
-    <button onclick="go(1)" id="mob-next">→</button>
-  </div>
-
 </div><!-- /frame -->
+
+<!-- MOBILE SIDE ARROWS — outside frame so fixed works on iOS -->
+<button class="mob-arrow mob-arrow-prev" id="mob-arr-prev" onclick="go(-1)" style="display:none">›</button>
+<button class="mob-arrow mob-arrow-next" id="mob-arr-next" onclick="go(1)"  style="display:none">‹</button>
 
 <script>
   const slides = document.querySelectorAll('.slide');
