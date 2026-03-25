@@ -847,33 +847,44 @@
     .topbar-menu { display: none; }
 
     .bottombar {
-      padding: 0 16px;
-      height: 60px;
+      padding: 0 20px;
+      height: 48px;
       flex-shrink: 0;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 32px;
       border-top: 1px solid #e8e8e8;
     }
     .bottom-left { display: none; }
     .dots { display: none; }
-    .bottom-nav {
-      display: flex;
+    .bottom-nav { display: none; }
+    .counter {
+      font-size: 12px;
+      color: #bbb;
+      text-align: center;
+      letter-spacing: 0.08em;
+    }
+
+    /* floating side arrows */
+    .mob-arrow {
+      display: flex !important;
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 999;
+      width: 44px; height: 72px;
       align-items: center;
-      gap: 32px;
+      justify-content: center;
+      font-size: 22px;
+      color: #999;
+      background: rgba(255,255,255,0.85);
+      border: 1px solid #e8e8e8;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
     }
-    .counter { font-size: 13px; color: #bbb; min-width: 40px; text-align: center; }
-    .nav-btn {
-      font-size: 24px;
-      width: 44px; height: 44px;
-      display: flex; align-items: center; justify-content: center;
-      color: #333;
-      border: 1px solid #ddd;
-      border-radius: 50%;
-      background: #fff;
-    }
-    .nav-btn:disabled { opacity: 0.2; }
+    .mob-arrow:disabled { opacity: 0.15; }
+    .mob-arrow-prev { right: 0; border-radius: 8px 0 0 8px; border-right: none; }
+    .mob-arrow-next { left: 0;  border-radius: 0 8px 8px 0; border-left: none; }
 
     /* slides stay as deck — one at a time */
     .slides-wrap {
@@ -1349,6 +1360,10 @@
 
   <div class="swipe-hint">← החליקי לניווט →</div>
 
+  <!-- MOBILE SIDE ARROWS -->
+  <button class="mob-arrow mob-arrow-prev" id="mob-arr-prev" onclick="go(-1)" style="display:none">›</button>
+  <button class="mob-arrow mob-arrow-next" id="mob-arr-next" onclick="go(1)"  style="display:none">‹</button>
+
   <!-- MOBILE NAV (sticky bottom) -->
   <div class="mob-nav-bar" id="mob-nav">
     <button onclick="go(-1)" id="mob-prev" disabled>←</button>
@@ -1401,6 +1416,10 @@
     titleTop.textContent = titlesTop[cur];
     btnPrev.disabled = cur === 0;
     btnNext.disabled = cur === slides.length - 1;
+    const ma1 = document.getElementById('mob-arr-prev');
+    const ma2 = document.getElementById('mob-arr-next');
+    if (ma1) ma1.disabled = cur === 0;
+    if (ma2) ma2.disabled = cur === slides.length - 1;
     document.getElementById('mob-prev').disabled = cur === 0;
     document.getElementById('mob-next').disabled = cur === slides.length - 1;
     document.getElementById('mob-counter').textContent = (cur + 1) + ' / ' + slides.length;
@@ -1424,13 +1443,19 @@
     if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   go(-1);
   });
 
-  // swipe: left = next, right = prev (standard mobile)
+  // swipe: right = next, left = prev (RTL)
   let tx = 0;
   document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
   document.addEventListener('touchend', e => {
     const dx = e.changedTouches[0].clientX - tx;
-    if (Math.abs(dx) > 50) go(dx < 0 ? 1 : -1);
+    if (Math.abs(dx) > 50) go(dx > 0 ? 1 : -1);
   }, { passive: true });
+
+  // show mobile arrows only on mobile
+  if (window.innerWidth <= 640) {
+    document.getElementById('mob-arr-prev').style.display = 'flex';
+    document.getElementById('mob-arr-next').style.display = 'flex';
+  }
 
   goTo(0);
 </script>
