@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Midjourney V8 — המדריך הפשוט</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Heebo', sans-serif;
+    background: #f0efed;
+    height: 100vh;
+    overflow: hidden;
+    color: #111;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ── FRAME ── */
+  .frame {
+    width: min(1100px, 96vw);
+    height: min(680px, 92vh);
+    background: #fff;
+    box-shadow: 0 4px 60px rgba(0,0,0,0.12);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 36px;
+    border-bottom: 1px solid #e8e8e8;
+    flex-shrink: 0;
+    height: 58px;
+  }
+
+  .topbar-logo {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #111;
+  }
+  .topbar-logo span { color: #bbb; font-weight: 300; }
+
+  .topbar-center {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: #ccc;
+    font-weight: 300;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .topbar-menu {
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    color: #888;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  /* ── SLIDES ── */
+  .slides-wrap {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: none;
+  }
+  .slide.active { display: block; }
+
+  /* ── BOTTOM BAR ── */
+  .bottombar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 36px;
+    border-top: 1px solid #e8e8e8;
+    flex-shrink: 0;
+    height: 52px;
+  }
+
+  .bottom-left {
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: #bbb;
+    font-weight: 300;
+  }
+
+  .bottom-nav {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .nav-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 22px;
+    color: #bbb;
+    padding: 0 6px;
+    transition: color 0.15s;
+    line-height: 1;
+  }
+  .nav-btn:hover { color: #111; }
+  .nav-btn:disabled { opacity: 0.18; cursor: default; }
+
+  .counter {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: #ccc;
+    font-weight: 300;
+    min-width: 44px;
+    text-align: center;
+  }
+
+  /* dots */
+  .dots {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: #ddd;
+    cursor: pointer;
+    transition: all 0.22s;
+  }
+  .dot.active {
+    background: #111;
+    width: 16px;
+    border-radius: 3px;
+  }
+
+  /* ═══════════════════
+     SHARED HELPERS
+  ═══════════════════ */
+  .lbl {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #bbb;
+    margin-bottom: 14px;
+  }
+
+  .rule-line { width: 36px; height: 2px; background: #111; margin: 18px 0; }
+
+  /* ═══════════════════
+     SLIDE 1 — TITLE
+  ═══════════════════ */
+  .s1 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    height: 100%;
+  }
+
+  .s1-right {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 44px 40px 44px 0;
+    border-left: 1px solid #e8e8e8;
+  }
+
+  .s1-right .eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #bbb;
+  }
+
+  .s1-right h1 {
+    font-size: clamp(80px, 13vw, 150px);
+    font-weight: 900;
+    line-height: 0.88;
+    letter-spacing: -0.05em;
+    color: #111;
+  }
+
+  .s1-right .meta {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .s1-right .meta p {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #bbb;
+    font-weight: 400;
+    line-height: 1.8;
+  }
+
+  .s1-left {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+  }
+
+  .s1-left img {
+    height: clamp(140px, 22vw, 260px);
+    width: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 8px 24px rgba(0,0,0,0.07));
+    mix-blend-mode: multiply;
+  }
+
+  /* ═══════════════════
+     SLIDE 2
+  ═══════════════════ */
+  .s-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    height: 100%;
+  }
+
+  .s-half {
+    padding: 40px 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 16px;
+  }
+
+  .s-half:first-child { border-left: 1px solid #e8e8e8; }
+
+  .s-half img {
+    height: clamp(150px, 22vw, 260px);
+    width: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 8px 24px rgba(0,0,0,0.06));
+    mix-blend-mode: multiply;
+    align-self: center;
+  }
+
+  .s-half h2 {
+    font-size: clamp(26px, 3.6vw, 46px);
+    font-weight: 900;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+  }
+
+  .s-half .body {
+    font-size: clamp(13px, 1.35vw, 15px);
+    font-weight: 300;
+    color: #666;
+    line-height: 1.85;
+  }
+
+  .s-half .punch {
+    font-size: clamp(14px, 1.5vw, 16px);
+    font-weight: 700;
+    color: #111;
+    border-top: 1px solid #eee;
+    padding-top: 16px;
+    line-height: 1.5;
+  }
+
+  /* ═══════════════════
+     SLIDE 3 — מילים
+  ═══════════════════ */
+  .s3 {
+    padding: 36px 40px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .s3 h2 {
+    font-size: clamp(40px, 6.5vw, 84px);
+    font-weight: 900;
+    line-height: 0.92;
+    letter-spacing: -0.04em;
+  }
+
+  .compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 28px 1fr;
+    gap: 0;
+    flex: 1;
+    border-top: 1px solid #e8e8e8;
+    padding-top: 20px;
+  }
+
+  .cmp-col { display: flex; flex-direction: column; gap: 12px; }
+  .cmp-col:first-child { padding-left: 0; padding-right: 16px; }
+  .cmp-col:last-child { padding-right: 0; padding-left: 16px; }
+
+  .cmp-head {
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .cmp-col.before .cmp-head { color: #ccc; }
+  .cmp-col.after  .cmp-head { color: #111; }
+
+  .cmp-item {
+    border-top: 1px solid #f0f0f0;
+    padding-top: 10px;
+  }
+  .cmp-item .ci-tag {
+    font-size: 9px; letter-spacing: 0.1em;
+    text-transform: uppercase; color: #ccc; margin-bottom: 3px;
+  }
+  .cmp-item p {
+    font-size: clamp(12px, 1.3vw, 14px);
+    color: #555; line-height: 1.5; font-weight: 300;
+  }
+  .cmp-col.after .cmp-item p { color: #111; font-weight: 400; }
+
+  .cmp-arrow {
+    display: flex; align-items: flex-start;
+    justify-content: center; padding-top: 32px;
+    color: #ccc; font-size: 16px;
+  }
+
+  /* ═══════════════════
+     SLIDE 4 — Tokens
+  ═══════════════════ */
+  .s4 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    height: 100%;
+  }
+
+  .s4-left {
+    border-left: 1px solid #e8e8e8;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .s4-left .big {
+    font-size: clamp(34px, 5vw, 64px);
+    font-weight: 900;
+    line-height: 1.0;
+    letter-spacing: -0.04em;
+  }
+
+  .s4-left .desc {
+    font-size: clamp(12px, 1.3vw, 14px);
+    color: #666; font-weight: 300; line-height: 1.8;
+  }
+
+  .s4-left img {
+    height: clamp(90px, 13vw, 160px);
+    width: auto; object-fit: contain;
+    mix-blend-mode: multiply;
+    filter: drop-shadow(0 4px 14px rgba(0,0,0,0.06));
+  }
+
+  .s4-right {
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    justify-content: center;
+  }
+
+  .tg-label {
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 7px; margin-bottom: 8px;
+  }
+  .tg-label.bad  { color: #c04040; }
+  .tg-label.good { color: #2a7a50; }
+
+  .token-list { display: flex; flex-wrap: wrap; gap: 6px; }
+  .token {
+    padding: 4px 10px; border-radius: 3px;
+    font-size: 11px; font-family: monospace;
+    direction: ltr; display: inline-block;
+  }
+  .token.bad  { background: #fdf5f5; border: 1px solid #f0d8d8; color: #c04040; }
+  .token.good { background: #f5fbf8; border: 1px solid #c8e8d8; color: #2a7a50; }
+
+  /* ═══════════════════
+     SLIDE 5 — Stylize
+  ═══════════════════ */
+  .s5 {
+    padding: 36px 40px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  .s5 .top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 1px solid #e8e8e8;
+    padding-bottom: 20px;
+  }
+
+  .s5 h2 {
+    font-size: clamp(40px, 6.5vw, 82px);
+    font-weight: 900;
+    line-height: 0.92;
+    letter-spacing: -0.04em;
+  }
+
+  .s5 .en-sub {
+    font-size: clamp(12px, 1.3vw, 14px);
+    font-weight: 300; color: #999;
+    text-align: left; max-width: 240px; line-height: 1.7;
+  }
+
+  .styl-track {
+    height: 2px;
+    background: linear-gradient(90deg, #b0ddd8 0%, #c8b8e0 50%, #e8a898 100%);
+  }
+
+  .styl-nums {
+    display: flex; justify-content: space-between; margin-top: 6px;
+  }
+  .styl-nums span { font-size: 10px; letter-spacing: 0.05em; color: #ccc; }
+
+  .styl-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1px;
+    background: #e8e8e8;
+    border: 1px solid #e8e8e8;
+    flex: 1;
+  }
+
+  .sc {
+    background: #fff;
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .sc .sn {
+    font-size: clamp(24px, 3.2vw, 40px);
+    font-weight: 900;
+    letter-spacing: -0.03em; line-height: 1;
+  }
+  .sc.low .sn  { color: #7ec8c0; }
+  .sc.mid .sn  { color: #a89fcc; }
+  .sc.high .sn { color: #e8907a; }
+  .sc .st { font-size: 13px; font-weight: 700; color: #111; }
+  .sc .sd { font-size: 12px; font-weight: 300; color: #888; line-height: 1.55; }
+
+  /* ═══════════════════
+     SLIDE 6 — SV6/SV7
+  ═══════════════════ */
+  .s6 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    height: 100%;
+  }
+
+  .sv-half {
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .sv-half:first-child { border-left: 1px solid #e8e8e8; }
+
+  .sv-tag {
+    font-family: monospace; font-size: 11px; font-weight: 700;
+    direction: ltr; padding: 3px 10px;
+    border: 1px solid #ddd; border-radius: 3px;
+    color: #666; display: inline-block;
+    margin-bottom: 10px; width: fit-content;
+  }
+
+  .sv-half h3 {
+    font-size: clamp(24px, 3.4vw, 44px);
+    font-weight: 900; letter-spacing: -0.03em; line-height: 1.1;
+  }
+
+  .sv-half .sv-desc {
+    font-size: clamp(12px, 1.3vw, 14px);
+    font-weight: 300; color: #777; line-height: 1.75; margin-top: 10px;
+  }
+
+  .sv-half img {
+    height: clamp(100px, 16vw, 190px);
+    width: auto; object-fit: contain;
+    mix-blend-mode: multiply;
+    filter: drop-shadow(0 6px 18px rgba(0,0,0,0.07));
+    align-self: center;
+  }
+
+  .sv-use {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; color: #ccc;
+    border-top: 1px solid #eee; padding-top: 12px;
+  }
+  .sv-use strong { color: #111; }
+
+  /* ═══════════════════
+     SLIDE 7 — HD/Q
+  ═══════════════════ */
+  .s7 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    height: 100%;
+  }
+
+  .s7-left {
+    border-left: 1px solid #e8e8e8;
+    display: flex; align-items: center; justify-content: center;
+    padding: 40px;
+  }
+
+  .s7-left img {
+    height: clamp(140px, 21vw, 250px);
+    width: auto; object-fit: contain;
+    mix-blend-mode: multiply;
+    filter: drop-shadow(0 8px 24px rgba(0,0,0,0.07));
+  }
+
+  .s7-right {
+    padding: 40px;
+    display: flex; flex-direction: column; gap: 20px; justify-content: center;
+  }
+
+  .s7-right h2 {
+    font-size: clamp(28px, 4vw, 50px);
+    font-weight: 900; letter-spacing: -0.03em; line-height: 1.1;
+  }
+
+  .param-list { display: flex; flex-direction: column; gap: 14px; }
+
+  .param-item {
+    border-top: 1px solid #f0f0f0;
+    padding-top: 12px;
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+
+  .p-badge {
+    font-family: monospace; font-size: 12px; font-weight: 700;
+    direction: ltr; background: #f8f8f8;
+    border: 1px solid #eee; padding: 3px 10px; border-radius: 3px;
+    color: #555; flex-shrink: 0; margin-top: 1px;
+  }
+
+  .p-text {
+    font-size: clamp(12px, 1.3vw, 14px);
+    font-weight: 300; color: #666; line-height: 1.7;
+  }
+  .p-text strong { color: #111; font-weight: 600; }
+
+  .warn-strip {
+    border-top: 2px solid #111; padding-top: 14px;
+    font-size: clamp(12px, 1.3vw, 14px);
+    font-weight: 600; color: #111; line-height: 1.5;
+  }
+
+  /* ═══════════════════
+     SLIDE 8 — Convo
+  ═══════════════════ */
+  .s8 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    height: 100%;
+  }
+
+  .s8-left {
+    border-left: 1px solid #e8e8e8;
+    padding: 40px;
+    display: flex; flex-direction: column; justify-content: center; gap: 16px;
+  }
+
+  .s8-left h2 {
+    font-size: clamp(26px, 3.8vw, 48px);
+    font-weight: 900; letter-spacing: -0.03em; line-height: 1.1;
+  }
+
+  .s8-left .desc {
+    font-size: clamp(12px, 1.3vw, 14px);
+    font-weight: 300; color: #777; line-height: 1.8;
+  }
+
+  .s8-right {
+    padding: 40px;
+    display: flex; flex-direction: column; gap: 12px; justify-content: center;
+  }
+
+  .bubble {
+    padding: 12px 16px; border-radius: 10px;
+    font-size: clamp(11px, 1.2vw, 13px);
+    line-height: 1.65; max-width: 90%;
+  }
+  .bubble.user {
+    background: #f8f8f8; border: 1px solid #eee; color: #444;
+    align-self: flex-end; border-radius: 10px 10px 3px 10px;
+  }
+  .bubble.mj {
+    background: #fff; border: 1px solid #e8e8e8; color: #555;
+    align-self: flex-start; border-radius: 10px 10px 10px 3px;
+  }
+  .b-label {
+    display: block; font-size: 9px; font-weight: 700;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: #bbb; margin-bottom: 4px;
+  }
+
+  /* ═══════════════════
+     SLIDE 9 — כלל הזהב
+  ═══════════════════ */
+  .slide-9-wrap { background: #111; }
+
+  .slide-9-wrap .topbar {
+    border-bottom-color: #222; background: #111;
+  }
+  .slide-9-wrap .topbar-logo { color: #fff; }
+  .slide-9-wrap .topbar-logo span { color: #444; }
+  .slide-9-wrap .topbar-center { color: #333; }
+  .slide-9-wrap .topbar-menu { color: #444; }
+  .slide-9-wrap .bottombar {
+    border-top-color: #222; background: #111;
+  }
+  .slide-9-wrap .bottom-left { color: #333; }
+  .slide-9-wrap .counter { color: #333; }
+  .slide-9-wrap .nav-btn { color: #444; }
+  .slide-9-wrap .nav-btn:hover { color: #fff; }
+  .slide-9-wrap .dot { background: #333; }
+  .slide-9-wrap .dot.active { background: #fff; }
+
+  .s9 {
+    height: 100%;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 20px; padding: 40px;
+    background: #111;
+  }
+
+  .s9 .ey {
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.22em; text-transform: uppercase; color: #444;
+  }
+
+  .s9 img {
+    height: clamp(90px, 13vw, 160px);
+    width: auto;
+    filter: brightness(1.1) drop-shadow(0 8px 24px rgba(0,0,0,0.5));
+    mix-blend-mode: normal !important;
+  }
+
+  .s9 h2 {
+    font-size: clamp(44px, 7.5vw, 100px);
+    font-weight: 900; line-height: 0.92;
+    letter-spacing: -0.04em; color: #fff; text-align: center;
+  }
+  .s9 h2 .a { color: #e8907a; }
+
+  .s9 .rules {
+    border-top: 1px solid #222; padding-top: 18px;
+    display: flex; flex-direction: column; gap: 5px; text-align: center;
+  }
+  .s9 .rl {
+    font-size: clamp(13px, 1.5vw, 16px);
+    font-weight: 300; color: #555; line-height: 1.6;
+  }
+  .s9 .rl strong { color: #ccc; font-weight: 500; }
+  .s9 .rl .a { color: #e8907a; }
+
+  .s9 .fn {
+    font-size: 12px; font-weight: 300;
+    color: #333; font-style: italic; margin-top: 6px;
+  }
+
+  /* ═══════════════════
+     SLIDE 10 — שפה מרחבית
+  ═══════════════════ */
+  .s10 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    height: 100%;
+  }
+  .s10-left {
+    border-left: 1px solid #e8e8e8;
+    padding: 40px;
+    display: flex; flex-direction: column; justify-content: center; gap: 20px;
+  }
+  .s10-left h2 {
+    font-size: clamp(28px, 4vw, 52px);
+    font-weight: 900; letter-spacing: -0.03em; line-height: 1.1;
+  }
+  .s10-left .desc {
+    font-size: clamp(12px, 1.3vw, 14px);
+    font-weight: 300; color: #666; line-height: 1.8;
+  }
+  .s10-left img {
+    height: clamp(100px, 14vw, 170px);
+    width: auto; object-fit: contain;
+    mix-blend-mode: multiply;
+    filter: drop-shadow(0 4px 14px rgba(0,0,0,0.06));
+  }
+  .s10-right {
+    padding: 40px;
+    display: flex; flex-direction: column; gap: 20px; justify-content: center;
+  }
+  .word-group { display: flex; flex-direction: column; gap: 10px; }
+  .word-group .wg-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.16em;
+    text-transform: uppercase; border-bottom: 1px solid #f0f0f0; padding-bottom: 7px;
+  }
+  .word-group.visual .wg-label { color: #2a7a50; }
+  .word-group.logical .wg-label { color: #c04040; }
+  .word-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .wtag {
+    padding: 5px 12px; border-radius: 3px;
+    font-size: 12px; font-family: monospace;
+    direction: ltr; display: inline-block;
+  }
+  .wtag.v { background: #f5fbf8; border: 1px solid #c8e8d8; color: #2a7a50; }
+  .wtag.l { background: #fdf5f5; border: 1px solid #f0d8d8; color: #c04040; }
+  .s10-right .note {
+    font-size: clamp(11px, 1.2vw, 13px);
+    font-weight: 300; color: #999; line-height: 1.7;
+    border-top: 1px solid #f0f0f0; padding-top: 14px;
+  }
+
+  /* ═══════════════════
+     SLIDE 11 — טקסט בתמונה
+  ═══════════════════ */
+  .s11 {
+    padding: 36px 40px;
+    height: 100%;
+    display: flex; flex-direction: column; gap: 20px;
+  }
+  .s11 h2 {
+    font-size: clamp(36px, 5.5vw, 72px);
+    font-weight: 900; line-height: 0.92; letter-spacing: -0.04em;
+  }
+  .s11-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1px; background: #e8e8e8;
+    border: 1px solid #e8e8e8; flex: 1;
+  }
+  .s11-cell {
+    background: #fff; padding: 18px 20px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .s11-cell .ct {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.16em;
+    text-transform: uppercase; color: #bbb; margin-bottom: 2px;
+  }
+  .s11-cell .cv {
+    font-size: clamp(11px, 1.2vw, 13px);
+    font-weight: 300; color: #555; line-height: 1.65;
+  }
+  .s11-cell .cv code {
+    font-family: monospace; font-size: 11px;
+    background: #f5f5f5; padding: 1px 6px; border-radius: 3px;
+    direction: ltr; display: inline-block;
+  }
+  .s11-cell .cv .green { color: #2a7a50; font-weight: 500; }
+
+  /* ═══════════════════
+     SLIDE 12 — Troubleshooting
+  ═══════════════════ */
+  .s12 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    height: 100%;
+  }
+  .s12-left {
+    border-left: 1px solid #e8e8e8;
+    padding: 40px;
+    display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .s12-left h2 {
+    font-size: clamp(28px, 4vw, 52px);
+    font-weight: 900; letter-spacing: -0.03em; line-height: 1.1;
+  }
+  .s12-left .desc {
+    font-size: clamp(12px, 1.3vw, 14px);
+    font-weight: 300; color: #666; line-height: 1.8;
+  }
+  .s12-left img {
+    height: clamp(90px, 13vw, 160px); width: auto;
+    object-fit: contain; mix-blend-mode: multiply;
+    filter: drop-shadow(0 4px 14px rgba(0,0,0,0.06));
+  }
+  .s12-right {
+    padding: 40px;
+    display: flex; flex-direction: column; gap: 10px; justify-content: center;
+  }
+  .bug-item {
+    display: flex; gap: 12px; align-items: flex-start;
+    border-top: 1px solid #f5f5f5; padding-top: 9px;
+  }
+  .bug-name {
+    font-family: monospace; font-size: 11px; font-weight: 700;
+    direction: ltr; color: #c04040;
+    background: #fdf5f5; border: 1px solid #f0d8d8;
+    padding: 2px 8px; border-radius: 3px;
+    flex-shrink: 0; margin-top: 1px; min-width: 130px;
+  }
+  .bug-desc {
+    font-size: clamp(11px, 1.2vw, 13px);
+    font-weight: 300; color: #666; line-height: 1.6;
+  }
+
+  /* ═══════════════════
+     MOBILE
+  ═══════════════════ */
+  @media (max-width: 640px) {
+    body {
+      background: #f0efed;
+      height: auto;
+      overflow: auto;
+      align-items: flex-start;
+    }
+
+    .frame {
+      width: 100%;
+      height: auto;
+      min-height: 100vh;
+      box-shadow: none;
+      border-radius: 0;
+    }
+
+    .topbar { padding: 16px 20px; }
+    .topbar-center { display: none; }
+    .topbar-menu { display: none; }
+
+    .slides-wrap {
+      position: static;
+      height: auto;
+      overflow: visible;
+    }
+
+    .slide {
+      position: static;
+      display: block !important;
+      border-bottom: 1px solid #e8e8e8;
+    }
+
+    /* all grids → single column */
+    .s1, .s-split, .s4, .s6, .s7, .s8, .s10, .s12 {
+      grid-template-columns: 1fr !important;
+      height: auto;
+    }
+
+    /* hide creature images in grid slides on mobile */
+    .s1-left, .s7-left, .s-half:first-child { display: none; }
+
+    .s1-right {
+      padding: 32px 20px;
+      border-left: none;
+    }
+
+    .s-half, .s4-left, .s4-right,
+    .sv-half, .s7-right, .s8-left, .s8-right,
+    .s10-left, .s10-right, .s12-left, .s12-right {
+      padding: 24px 20px;
+      border-left: none !important;
+    }
+
+    /* stack grids: show left side above right side */
+    .s4, .s6, .s10, .s12 { display: flex; flex-direction: column; }
+
+    .s4-left img, .s12-left img { height: 100px; }
+
+    .s3, .s5, .s11 { padding: 24px 20px; }
+
+    .s5 .top-row { flex-direction: column; align-items: flex-start; gap: 8px; }
+
+    .styl-cards, .s11-grid { grid-template-columns: 1fr; }
+
+    .compare-grid { grid-template-columns: 1fr; }
+    .cmp-arrow { display: none; }
+
+    .s9 { padding: 32px 20px; }
+
+    .bottombar { padding: 12px 20px; }
+    .dots { display: none; }
+
+    /* mobile slide label */
+    .mob-label {
+      display: block;
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      color: #bbb; padding: 20px 20px 0;
+    }
+
+    /* hide desktop nav, show simple mobile nav */
+    .bottom-nav { display: none; }
+    .bottombar { justify-content: center; }
+    .counter { display: none; }
+    .bottom-left { display: none; }
+    .mob-nav-bar {
+      display: flex !important;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      padding: 16px;
+      border-top: 1px solid #e8e8e8;
+      background: #fff;
+      position: sticky;
+      bottom: 0;
+    }
+    .mob-nav-bar button {
+      background: #111; color: #fff;
+      border: none; padding: 10px 24px;
+      border-radius: 3px; font-size: 15px;
+      cursor: pointer; font-family: 'Heebo', sans-serif;
+    }
+    .mob-nav-bar .mob-counter {
+      font-size: 12px; color: #bbb; letter-spacing: 0.08em;
+    }
+  }
+
+  @media (min-width: 641px) {
+    .mob-nav-bar { display: none; }
+    .mob-label { display: none; }
+  }
+
+</style>
+</head>
+<body>
+
+<div class="frame" id="frame">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-logo">MIDJOURNEY <span>/ The Tribe</span></div>
+    <div class="topbar-center" id="slide-title">גרסה 8 — המדריך הפשוט</div>
+    <div class="topbar-menu">Menu ≡</div>
+  </div>
+
+  <!-- SLIDES -->
+  <div class="slides-wrap">
+
+    <!-- SLIDE 1 — Title -->
+    <div class="slide active">
+      <div class="s1">
+        <div class="s1-right">
+          <div class="eyebrow">גרסה 8 — המדריך הפשוט</div>
+          <h1>V8</h1>
+          <div class="meta">
+            <p>Midjourney Version 8</p>
+            <p>Prompt Adherence</p>
+            <p>Style Control</p>
+            <p>The Tribe — 2025</p>
+          </div>
+        </div>
+        <div class="s1-left">
+          <img src="images/fluffy_helper.png" alt="">
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2 — מה השתנה -->
+    <div class="slide">
+      <div class="s-split">
+        <div class="s-half" style="align-items:center;justify-content:center;">
+          <img src="images/polite_creature.png" alt="">
+        </div>
+        <div class="s-half">
+          <div class="lbl">מה השתנה</div>
+          <h2>V7 מילא פערים.<br>V8 מקשיב.</h2>
+          <div class="rule-line"></div>
+          <p class="body">
+            הגרסה הקודמת היתה כמו חבר שממלא פערים.
+            כתבת "אישה עם כלב" — הוא הוסיף שמש, עצים, אולי גם רכבת ברקע. לא ביקשת. הוא פשוט ידע.<br><br>
+            V8 שונה. הוא נצמד למה שכתבת. השיפור הגדול הוא בקשר בין הניסוח לבין מה שמופיע בפועל.
+          </p>
+          <p class="punch">יותר שליטה. יותר אחריות. יותר תיאור.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3 — מילים זה הכל -->
+    <div class="slide">
+      <div class="s3">
+        <div class="lbl">Word Choice</div>
+        <h2>מילים<br>זה הכל.</h2>
+        <div class="compare-grid">
+          <div class="cmp-col before">
+            <div class="cmp-head">ניסוח חלש</div>
+            <div class="cmp-item"><div class="ci-tag">א׳</div><p>"a woman sitting"</p></div>
+            <div class="cmp-item"><div class="ci-tag">ב׳</div><p>"white dress"</p></div>
+            <div class="cmp-item"><div class="ci-tag">ג׳</div><p>"dark room"</p></div>
+          </div>
+          <div class="cmp-arrow">→</div>
+          <div class="cmp-col after">
+            <div class="cmp-head">ניסוח חזק</div>
+            <div class="cmp-item"><div class="ci-tag">א׳</div><p>"a tired woman on a wooden chair, late afternoon light"</p></div>
+            <div class="cmp-item"><div class="ci-tag">ב׳</div><p>"Victorian cotton dress, off-white, slightly worn"</p></div>
+            <div class="cmp-item"><div class="ci-tag">ג׳</div><p>"candlelit room, warm amber shadows, 18th century"</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4 — Chaotic Tokens -->
+    <div class="slide">
+      <div class="s4">
+        <div class="s4-left">
+          <div>
+            <div class="lbl">Chaotic Tokens</div>
+            <div class="big">המילים<br>שמבלבלות<br>אותו</div>
+          </div>
+          <p class="desc">
+            יש מילים שנראות הגיוניות אבל V8 לא יודע מה לעשות איתן.
+            הוא לא מצלם. הוא לא מקיים הוראות.
+            <strong>הוא מצייר מה שתיארת.</strong>
+          </p>
+          <img src="images/lost_girl.png" alt="">
+        </div>
+        <div class="s4-right">
+          <div>
+            <div class="tg-label bad">להימנע</div>
+            <div class="token-list">
+              <span class="token bad">make sure</span>
+              <span class="token bad">I want</span>
+              <span class="token bad">please create</span>
+              <span class="token bad">cinematic masterpiece</span>
+              <span class="token bad">HDR</span>
+              <span class="token bad">f/1.8</span>
+              <span class="token bad">ISO 100</span>
+              <span class="token bad">award-winning</span>
+              <span class="token bad">16k</span>
+              <span class="token bad">philosophical</span>
+            </div>
+          </div>
+          <div>
+            <div class="tg-label good">במקום זה</div>
+            <div class="token-list">
+              <span class="token good">soft afternoon light</span>
+              <span class="token good">worn leather texture</span>
+              <span class="token good">1920s style</span>
+              <span class="token good">muted green tones</span>
+              <span class="token good">close-up shot</span>
+              <span class="token good">golden hour</span>
+              <span class="token good">shallow depth</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 5 — Stylize -->
+    <div class="slide">
+      <div class="s5">
+        <div class="top-row">
+          <div>
+            <div class="lbl">--stylize</div>
+            <h2>הדימר</h2>
+          </div>
+          <p class="en-sub">כמה כוח נותנים למודל לפרש אותך — לעומת כמה שמרת לעצמך.</p>
+        </div>
+        <div>
+          <div class="styl-track"></div>
+          <div class="styl-nums">
+            <span>0</span><span>100</span><span>250</span><span>500</span><span>750</span><span>1000</span>
+          </div>
+        </div>
+        <div class="styl-cards">
+          <div class="sc low">
+            <div class="sn">0–100</div>
+            <div class="st">אתה שולט</div>
+            <div class="sd">נצמד להנחיה. מדויק. לפעמים קצת יבש — אבל בדיוק מה שביקשת.</div>
+          </div>
+          <div class="sc mid">
+            <div class="sn">100–400</div>
+            <div class="st">איזון</div>
+            <div class="sd">הנקודה המתוקה. בין שליטה לאסתטיקה. ברירת המחדל היא 100.</div>
+          </div>
+          <div class="sc high">
+            <div class="sn">400–1000</div>
+            <div class="st">הוא מפרש</div>
+            <div class="sd">יפה יותר — אבל לא תמיד מה שרצית. הוא לוקח חופשות יצירתיות.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 6 — SV6 vs SV7 -->
+    <div class="slide">
+      <div class="s6">
+        <div class="sv-half">
+          <div>
+            <div class="sv-tag">--sv 6</div>
+            <h3>נאמן<br>ומדויק</h3>
+            <p class="sv-desc">עושה בדיוק מה שביקשת. קומפוזיציה ברורה, עקבי, שולט. כמו עוזר טוב שלא מפתיע.</p>
+          </div>
+          <img src="images/polite_creature.png" alt="">
+          <div class="sv-use">כשרוצים: <strong>שליטה ודיוק</strong></div>
+        </div>
+        <div class="sv-half">
+          <div>
+            <div class="sv-tag">--sv 7</div>
+            <h3>חופשי<br>ומפתיע</h3>
+            <p class="sv-desc">נותן חופש, מפרש, מוסיף את שלו. יותר הפתעות — לטוב ולרע.</p>
+          </div>
+          <img src="images/bear_unicorn.png" alt="">
+          <div class="sv-use">כשרוצים: <strong>יצירתיות והפתעה</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 7 — HD & Q -->
+    <div class="slide">
+      <div class="s7">
+        <div class="s7-left">
+          <img src="images/installer_creature.png" alt="">
+        </div>
+        <div class="s7-right">
+          <div class="lbl">Power Tools</div>
+          <h2>שווה<br>לשלם?</h2>
+          <div class="param-list">
+            <div class="param-item">
+              <div class="p-badge">--hd</div>
+              <div class="p-text"><strong>High Definition seed.</strong> לא רק "גדול יותר" — מתחיל את כל העיבוד מרזולוציה גבוהה. משנה את ההתנהגות של כל הראונד.</div>
+            </div>
+            <div class="param-item">
+              <div class="p-badge">--q</div>
+              <div class="p-text"><strong>Quality — זמן אפייה ארוך.</strong> התמונה יותר קוהרנטית, כל החלקים מתחברים טוב יותר. גם יציבות דמויות וסגנון.</div>
+            </div>
+          </div>
+          <div class="warn-strip">שמור לתמונות שכבר הוכיחו את עצמן —<br>לא כברירת מחדל.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 8 — Conversational Mode -->
+    <div class="slide">
+      <div class="s8">
+        <div class="s8-left">
+          <div class="lbl">Conversational Mode</div>
+          <h2>לדבר<br>בגובה<br>העיניים</h2>
+          <p class="desc">כשאתה תקוע ולא יוצאות לך מילים טכניות — פשוט תדבר. הוא יתרגם לפרומפט בשבילך.<br><br>עובד טוב כשהראש שלך לא מצייר מילים.</p>
+        </div>
+        <div class="s8-right">
+          <div class="bubble user">
+            <span class="b-label">את אומרת</span>
+            כתוב לי תיאור של editorial photography עם אור רך ועצב קל. שמלה וינטג׳ סגולה. קפה קטן בפריז.
+          </div>
+          <div class="bubble mj">
+            <span class="b-label">Midjourney מתרגם</span>
+            A young woman in a vintage violet dress sitting alone at a small Parisian café, soft diffused morning light, melancholic atmosphere —ar 3:4 --sv 6 --stylize 200
+          </div>
+          <div class="bubble user">
+            <span class="b-label">את אומרת</span>
+            תכתוב את זה כמו product photo, שפה פשוטה וישירה.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 9 — שפה מרחבית -->
+    <div class="slide">
+      <span class="mob-label">09 — שפה מרחבית</span>
+      <div class="s10">
+        <div class="s10-left">
+          <div class="lbl">Spatial Language</div>
+          <h2>מילים<br>חזותיות<br>לעומת לוגיות</h2>
+          <p class="desc">
+            V8 מגיב טוב יותר למילים שמתרגמות ישירות לתמונה.
+            מילים של <strong>מיקום ומרחב</strong> — הוא מבין.
+            מילים של <strong>סדר ורצף</strong> — פחות.
+          </p>
+          <img src="images/drumming_goat.png" alt="">
+        </div>
+        <div class="s10-right">
+          <div class="word-group visual">
+            <div class="wg-label">מילים חזותיות ✓</div>
+            <div class="word-tags">
+              <span class="wtag v">beside</span>
+              <span class="wtag v">above</span>
+              <span class="wtag v">below</span>
+              <span class="wtag v">between</span>
+              <span class="wtag v">beyond</span>
+              <span class="wtag v">in front of</span>
+              <span class="wtag v">behind</span>
+              <span class="wtag v">surrounding</span>
+            </div>
+          </div>
+          <div class="word-group logical">
+            <div class="wg-label">מילים לוגיות ✗</div>
+            <div class="word-tags">
+              <span class="wtag l">first</span>
+              <span class="wtag l">second</span>
+              <span class="wtag l">next</span>
+              <span class="wtag l">then</span>
+              <span class="wtag l">finally</span>
+            </div>
+          </div>
+          <p class="note">
+            כשיש כמה נושאים בסצנה — תעגן כל אחד במקום מרחבי.
+            לא "אישה וכלב ועץ" — אלא "אישה יושבת <em>לצד</em> עץ, כלב <em>מתחתיו</em>".
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 10 — טקסט בתמונה -->
+    <div class="slide">
+      <span class="mob-label">10 — טקסט בתוך תמונה</span>
+      <div class="s11">
+        <div class="lbl">Text in Image</div>
+        <h2>טקסט<br>בתוך תמונה</h2>
+        <div class="s11-grid">
+          <div class="s11-cell">
+            <div class="ct">שלב 1 — מילות עזר</div>
+            <div class="cv">
+              לא מספיק לשים מילים במרכאות.
+              צריך להוסיף מילת עזר שמסבירה לאן הטקסט הולך:<br><br>
+              <code>text</code> <code>typography</code> <code>writing</code>
+              <code>written</code> <code>printed</code> <code>graffiti</code>
+              <code>sign</code> <code>billboard</code>
+            </div>
+          </div>
+          <div class="s11-cell">
+            <div class="ct">שלב 2 — סגנון פונט</div>
+            <div class="cv">
+              לא שם פונט — <strong>ארכיטיפ</strong>.
+              V8 לא מכיר "Helvetica" אבל הוא מכיר:<br><br>
+              <code>handwriting</code><br>
+              <code>permanent marker</code><br>
+              <code>western style</code><br>
+              <code>cyberpunk lettering</code><br>
+              <code>vintage stamp</code>
+            </div>
+          </div>
+          <div class="s11-cell">
+            <div class="ct">שלב 3 — ניקוי</div>
+            <div class="cv">
+              לטקסט מושלם — שתי אפשרויות:<br><br>
+              <code>--raw</code> — עוזר לדיוק<br>
+              <code>--p</code> — עשוי לעזור<br><br>
+              לניקוי סופי של אותיות:
+              <span class="green">Nano Banana</span> או ה-Editor של מידג׳רני.<br><br>
+              זכרו: תוכן הטקסט עצמו יכול להשפיע על שאר התמונה.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 11 — Troubleshooting -->
+    <div class="slide">
+      <span class="mob-label">11 — כשלא עובד</span>
+      <div class="s12">
+        <div class="s12-left">
+          <div>
+            <div class="lbl">Troubleshooting</div>
+            <h2>כשלא<br>עובד —<br>למה?</h2>
+          </div>
+          <p class="desc">
+            לפני שמוחקים ומתחילים מחדש —
+            כדאי לאבחן מה בדיוק קרה.
+            V8 נכשל בדרכים מאוד ספציפיות.
+          </p>
+          <img src="images/terminal_pan.png" alt="">
+        </div>
+        <div class="s12-right">
+          <div class="bug-item">
+            <div class="bug-name">drift</div>
+            <div class="bug-desc">המודל סטה מהאסתטיקה שרצית. השארת יותר מדי מקום לדמיון.</div>
+          </div>
+          <div class="bug-item">
+            <div class="bug-name">archetype hijack</div>
+            <div class="bug-desc">דמות, חפץ או סגנון אחד "השתלט" על כל התמונה ודחק את השאר.</div>
+          </div>
+          <div class="bug-item">
+            <div class="bug-name">overload</div>
+            <div class="bug-desc">יותר מדי נושאים בסצנה אחת. V8 לא יודע מה הראשי ומה המשני.</div>
+          </div>
+          <div class="bug-item">
+            <div class="bug-name">wording problem</div>
+            <div class="bug-desc">מילה אחת משכה את כל התמונה לכיוון לא רצוי. בדוק כל מילה.</div>
+          </div>
+          <div class="bug-item">
+            <div class="bug-name">missing anchor</div>
+            <div class="bug-desc">אין נקודת עוגן. הנחיה שמשאירה את הנושא הראשי באוויר.</div>
+          </div>
+          <div class="bug-item">
+            <div class="bug-name">parameter mismatch</div>
+            <div class="bug-desc">פרמטרים שמתנגשים זה בזה — למשל stylize גבוה מול --raw.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 12 — כלל הזהב -->
+    <div class="slide slide-9-wrap">
+      <div class="s9">
+        <div class="ey">כלל הזהב</div>
+        <img src="images/preview_raccoon.png" alt="">
+        <h2>הוא מצייר מה ש<span class="a">תיארת</span>.</h2>
+        <div class="rules">
+          <p class="rl">לא מה שהתכוונת. <strong>מה שתיארת.</strong></p>
+          <p class="rl">ואם לא תיארת — <span class="a">הוא ישלים לבד.</span></p>
+          <p class="rl">זה לא בעיה. זה הכלל.</p>
+        </div>
+        <p class="fn">עכשיו תסגרו את המדריך. תפתחו את מידג׳רני. ותתארו.</p>
+      </div>
+    </div>
+
+  </div><!-- /slides-wrap -->
+
+  <!-- BOTTOM BAR -->
+  <div class="bottombar">
+    <div class="bottom-left" id="slide-label-bottom">01 — גרסה 8</div>
+    <div class="bottom-nav">
+      <button class="nav-btn" id="btn-prev" onclick="go(-1)" disabled>←</button>
+      <div class="dots" id="dots"></div>
+      <button class="nav-btn" id="btn-next" onclick="go(1)">→</button>
+    </div>
+    <div class="counter" id="counter">1 / 12</div>
+  </div>
+
+  <!-- MOBILE NAV (sticky bottom) -->
+  <div class="mob-nav-bar" id="mob-nav">
+    <button onclick="go(-1)" id="mob-prev" disabled>←</button>
+    <span class="mob-counter" id="mob-counter">1 / 12</span>
+    <button onclick="go(1)" id="mob-next">→</button>
+  </div>
+
+</div><!-- /frame -->
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const dotsEl = document.getElementById('dots');
+  const btnPrev = document.getElementById('btn-prev');
+  const btnNext = document.getElementById('btn-next');
+  const counter = document.getElementById('counter');
+  const labelBottom = document.getElementById('slide-label-bottom');
+  const titleTop = document.getElementById('slide-title');
+
+  const titles = [
+    '01 — גרסה 8', '02 — מה השתנה', '03 — מילים זה הכל',
+    '04 — Chaotic Tokens', '05 — Stylize', '06 — SV6 vs SV7',
+    '07 — HD & Q', '08 — Conversational Mode',
+    '09 — שפה מרחבית', '10 — טקסט בתמונה', '11 — Troubleshooting', '12 — כלל הזהב'
+  ];
+  const titlesTop = [
+    'גרסה 8 — המדריך הפשוט', 'מה השתנה ב-V8', 'Word Choice Matters',
+    'Chaotic Tokens', 'הדימר — Stylize', 'SV6 vs SV7',
+    'Power Tools', 'Conversational Mode',
+    'Spatial Language', 'Text in Image', 'Troubleshooting', 'כלל הזהב'
+  ];
+
+  let cur = 0;
+
+  // build dots
+  slides.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.onclick = () => goTo(i);
+    dotsEl.appendChild(d);
+  });
+
+  function goTo(n) {
+    slides[cur].classList.remove('active');
+    dotsEl.children[cur].classList.remove('active');
+    cur = n;
+    slides[cur].classList.add('active');
+    dotsEl.children[cur].classList.add('active');
+    counter.textContent = (cur + 1) + ' / ' + slides.length;
+    labelBottom.textContent = titles[cur];
+    titleTop.textContent = titlesTop[cur];
+    btnPrev.disabled = cur === 0;
+    btnNext.disabled = cur === slides.length - 1;
+    document.getElementById('mob-prev').disabled = cur === 0;
+    document.getElementById('mob-next').disabled = cur === slides.length - 1;
+    document.getElementById('mob-counter').textContent = (cur + 1) + ' / ' + slides.length;
+
+    // dark last slide
+    const frame = document.getElementById('frame');
+    if (cur === slides.length - 1) {
+      frame.style.background = '#111';
+    } else {
+      frame.style.background = '#fff';
+    }
+  }
+
+  function go(dir) {
+    const n = cur + dir;
+    if (n >= 0 && n < slides.length) goTo(n);
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') go(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   go(-1);
+  });
+
+  goTo(0);
+</script>
+</body>
+</html>
