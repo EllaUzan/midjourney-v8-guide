@@ -828,20 +828,25 @@
      MOBILE
   ═══════════════════ */
   @media (max-width: 640px) {
-    body { background: #fff; }
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      background: #fff;
+    }
 
     .frame {
       width: 100vw;
       height: 100vh;
       box-shadow: none;
       border-radius: 0;
+      overflow: hidden;
     }
 
-    .topbar { padding: 14px 20px; height: 50px; }
+    .topbar { padding: 14px 20px; height: 50px; flex-shrink: 0; }
     .topbar-center { display: none; }
     .topbar-menu { display: none; }
 
-    .bottombar { padding: 10px 20px; height: 56px; }
+    .bottombar { padding: 10px 20px; height: 56px; flex-shrink: 0; }
     .dots { display: none; }
     .bottom-left { display: none; }
     .counter { font-size: 13px; }
@@ -849,8 +854,19 @@
     .nav-btn { font-size: 26px; padding: 0 10px; }
 
     /* slides stay as deck — one at a time */
-    .slides-wrap { position: relative; overflow: hidden; }
-    .slide { position: absolute; inset: 0; display: none; overflow-y: auto; }
+    .slides-wrap {
+      position: relative;
+      overflow: hidden;
+      flex: 1;
+      height: calc(100vh - 106px);
+    }
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: none;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
     .slide.active { display: block; }
 
     /* all grids → single column */
