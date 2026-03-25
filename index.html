@@ -954,6 +954,31 @@
     @keyframes fadeout { to { opacity: 0; } }
   }
 
+  /* hide mobile arrows on desktop */
+  .mob-arrow { display: none; }
+
+  @media (max-width: 640px) {
+    .mob-arrow {
+      display: flex !important;
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 9999;
+      width: 44px; height: 72px;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: #777;
+      background: rgba(255,255,255,0.9);
+      border: 1px solid #e0e0e0;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .mob-arrow:disabled { opacity: 0.15; }
+    .mob-arrow-prev { right: 0; border-radius: 10px 0 0 10px; border-right: none; }
+    .mob-arrow-next { left: 0;  border-radius: 0 10px 10px 0; border-left: none; }
+  }
+
   @media (min-width: 641px) {
     .mob-nav-bar { display: none; }
     .mob-label { display: none; }
@@ -1363,8 +1388,8 @@
 </div><!-- /frame -->
 
 <!-- MOBILE SIDE ARROWS — outside frame so fixed works on iOS -->
-<button class="mob-arrow mob-arrow-prev" id="mob-arr-prev" onclick="go(-1)" style="display:none">›</button>
-<button class="mob-arrow mob-arrow-next" id="mob-arr-next" onclick="go(1)"  style="display:none">‹</button>
+<button class="mob-arrow mob-arrow-prev" id="mob-arr-prev" onclick="go(-1)">›</button>
+<button class="mob-arrow mob-arrow-next" id="mob-arr-next" onclick="go(1)">‹</button>
 
 <script>
   const slides = document.querySelectorAll('.slide');
