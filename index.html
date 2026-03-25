@@ -470,13 +470,41 @@
      SLIDE 6 — SV6/SV7
   ═══════════════════ */
   .s6 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
+    flex-direction: column;
     height: 100%;
   }
 
+  .sv-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .sv-note {
+    border-top: 2px solid #111;
+    padding: 13px 40px;
+    font-size: clamp(11px, 1.2vw, 13px);
+    color: #333;
+    background: #f5f4f1;
+    line-height: 1.65;
+    flex-shrink: 0;
+  }
+  .sv-note strong { color: #111; }
+  .sv-note code {
+    font-family: monospace;
+    background: #111;
+    color: #fff;
+    padding: 1px 7px;
+    border-radius: 3px;
+    font-size: 11px;
+    direction: ltr;
+    display: inline-block;
+  }
+
   .sv-half {
-    padding: 40px;
+    padding: 32px 40px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -1149,23 +1177,28 @@
     <!-- SLIDE 6 — SV6 vs SV7 -->
     <div class="slide">
       <div class="s6">
-        <div class="sv-half">
-          <div>
-            <div class="sv-tag">--sv 6</div>
-            <h3>Reliable<br>Adherence</h3>
-            <p class="sv-desc">דיוק, שליטה, קומפוזיציה מורכבת, ריבוי אלמנטים. כשחשוב שמידג׳רני יישאר נאמן להנחיה.</p>
+        <div class="sv-cols">
+          <div class="sv-half">
+            <div>
+              <div class="sv-tag">--sv 6</div>
+              <h3>Reliable<br>Adherence</h3>
+              <p class="sv-desc">דיוק, שליטה, קומפוזיציה מורכבת, ריבוי אלמנטים. כשחשוב שמידג׳רני יישאר נאמן להנחיה — ולסגנון שכבר הגדרת.</p>
+            </div>
+            <img src="images/polite_creature.png" alt="">
+            <div class="sv-use">מומלץ כשעובדים עם: <strong>מודבורדים / sref / קודי סגנון</strong></div>
           </div>
-          <img src="images/polite_creature.png" alt="">
-          <div class="sv-use">מומלץ: <strong>להתחיל כאן</strong> — להבין את ההנחיה</div>
+          <div class="sv-half">
+            <div>
+              <div class="sv-tag">--sv 7 ← ברירת מחדל</div>
+              <h3>Aggressive<br>Imagination</h3>
+              <p class="sv-desc">חופש, "קסם", פרשנות מודלית. פחות הקפדה קשיחה. כשרוצים תוצאה יצירתית — ואין סגנון קבוע שצריך לשמר.</p>
+            </div>
+            <img src="images/bear_unicorn.png" alt="">
+            <div class="sv-use">פחות מתאים: <strong>כשצריך עקביות סגנון</strong></div>
+          </div>
         </div>
-        <div class="sv-half">
-          <div>
-            <div class="sv-tag">--sv 7 ← ברירת מחדל</div>
-            <h3>Aggressive<br>Imagination</h3>
-            <p class="sv-desc">חופש, "קסם", פרשנות מודלית. פחות הקפדה קשיחה. כשרוצים תוצאה יצירתית יותר.</p>
-          </div>
-          <img src="images/bear_unicorn.png" alt="">
-          <div class="sv-use">אחר כך: <strong>לעבור לכאן</strong> — לחיפוש יצירתי</div>
+        <div class="sv-note">
+          <strong>חשוב כשעובדים עם מודבורד / sref / קודי סגנון:</strong> ברירת המחדל היא SV7 — והיא עלולה לגרום למידג׳רני לחרוג מהסגנון המוכר ולעשות פתאום דברים אחרים. הפתרון פשוט: להוסיף <code>--sv 6</code> בסוף ההנחיה, וזה יראה בסגנון שהתרגלת אליו.
         </div>
       </div>
     </div>
